@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from log import log, msg
 
 load_dotenv()
-TOKEN = os.dotenv("TOKEN")
+TOKEN = os.getenv("TOKEN")
 
 BOT_NAME = 'calc'
 
