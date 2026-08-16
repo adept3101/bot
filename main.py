@@ -1,12 +1,15 @@
-import telebot, time, math, re
+import telebot
+from telebot import types
+import re
 import os
 from dotenv import load_dotenv
-from log import log, msg
 
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
 
 BOT_NAME = 'calc'
+
+PI = 3.1415926535897932384626433832795
 
 def log(message):
     log = open("log.txt", "w")
@@ -37,14 +40,22 @@ def msg(message):
         print('Бот: %s'%msg.text)
 
 
-bot = telebot.TeleBot(TOKEN)
+bot = telebot.TeleBot(str(TOKEN))
 
-@bot.message_handler(commands=['start'])
+nav = types.ReplyKeyboardMarkup(resize_keyboard=True)
+test = types.KeyboardButton("test")
+
+@bot.message_handler(commands=['menu'])
+def menu(message):
+    bot.send_message(message.from_user.id, "/calc /pi")
+
+@bot.message_handler(commands=['calc'])
 def send_welcome(message):
     text = "Введите выражение и я попробую его вычислить"
     bot.send_message(message.from_user.id, text)
 
-@bot.message_handler(func=lambda message: True)
+# @bot.message_handler(func=lambda message: True)
+@bot.message_handler(commands=['calc'])
 def calc(message):
     try:
         result = eval(message.text)
@@ -52,8 +63,24 @@ def calc(message):
 
     except Exception as e:
         bot.send_message(message.from_user.id, 'Ошибка в вычислении')
+        print(e)
 
     log(message)
     msg(message)
 
 bot.polling(none_stop=True, interval=0)
+
+@bot.message_handler(commands=['pi'])
+def guess_pi(message):
+    try:
+        num = eval(message.text)
+        if PI % num == 0:
+            bot.send_message(message.from_user.id, 'Феноменально! Ты знаешь 31 значение числа пи.')
+        elif PI % num > 0 and PI % num < 0.0015926535897929917:
+            bot.send_message(message.from_user.id, 'Молодец ты знаешь число пи.')
+        else:
+            bot.send_message(message.from_user.id, 'Это никуда не годится учи математику.')
+    
+    except Exception as e:
+        bot.send_message(message.from_user.id, 'Ошибка в вводе')
+        print(e)
